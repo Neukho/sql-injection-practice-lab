@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SQL injection 개념과 방어법을 mock 데이터로 안전하게 실습하는 교육용 웹사이트">
+  <title>SQL Injection Practice Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 바로 이동</a>
+  <div class="grid-backdrop" aria-hidden="true"></div>
+
+  <header class="site-header" id="top">
+    <div class="shell header-shell">
+      <a class="brand" href="#top" aria-label="SQL Injection Practice Lab 상단으로 이동">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>SQL Injection Practice Lab</span>
+      </a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="#lab">실습</a>
+        <a href="#patterns">패턴</a>
+        <a href="#defense">방어</a>
+        <a href="#files">제출 파일</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="shell hero-shell">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Security Education Sandbox</p>
+          <h1>SQL Injection을 눈으로 보고 손으로 익히는 실습 사이트</h1>
+          <p class="hero-summary">
+            실제 데이터베이스 없이 브라우저 안에서만 동작하는 교육용 랩이다.
+            취약한 문자열 결합과 parameterized query를 비교하면서 로그인 우회, 검색 필터 우회, 정보 노출 위험을 안전하게 체험할 수 있다.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#lab">실습 시작</a>
+            <a class="button secondary" href="HARNESS_PROMPT.md">하네스 프롬프트 보기</a>
+          </div>
+          <dl class="hero-meta">
+            <div>
+              <dt>Runtime</dt>
+              <dd>HTML + CSS + JS</dd>
+            </div>
+            <div>
+              <dt>Scope</dt>
+              <dd>Mock Data Only</dd>
+            </div>
+            <div>
+              <dt>Focus</dt>
+              <dd>SQLi 원리와 방어 비교</dd>
+            </div>
+            <div>
+              <dt>Guardrail</dt>
+              <dd>No Backend, No Execution</dd>
+            </div>
+            <div>
+              <dt>Deploy</dt>
+              <dd>GitHub Pages Ready</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="hero-visual reveal" aria-hidden="true">
+          <div class="hero-terminal">
+            <p class="terminal-label">Unsafe Query</p>
+            <pre>SELECT * FROM users
+WHERE username = 'admin' --'
+AND password = 'anything';</pre>
+            <div class="terminal-divider"></div>
+            <p class="terminal-label">Safe Rewrite</p>
+            <pre>SELECT * FROM users
+WHERE username = ?
+AND password = ?;</pre>
+          </div>
+          <div class="visual-caption">
+            <span>문자열 결합</span>
+            <span>vs</span>
+            <span>Prepared Statement</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro">
+      <div class="shell intro-shell reveal">
+        <div>
+          <p class="eyebrow">What You Learn</p>
+          <h2>실습에서 바로 보는 세 가지 핵심</h2>
+        </div>
+        <ul class="intro-list">
+          <li>입력값이 SQL 구문으로 섞일 때 인증과 조회가 어떻게 무너지는지 본다.</li>
+          <li>같은 입력값도 safe query에서는 단순 데이터로 처리된다는 점을 비교한다.</li>
+          <li>결과 패널에서 우회 성공, 전체 데이터 노출, stacked query 위험을 단계별로 읽는다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section guardrail-section" id="guardrails">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Applied Constraints</p>
+            <h2>강화된 하네스 프롬프트 제약을 구현에 반영</h2>
+          </div>
+          <p class="section-copy">
+            이 사이트는 프롬프트 단계에서 정한 안전 제약을 그대로 구현에 옮겼다.
+            실제 실행이 아니라 규칙 기반 시뮬레이션만 허용하고, 모든 데이터는 브라우저 내부 mock data로만 처리한다.
+          </p>
+        </div>
+
+        <div class="guardrail-grid reveal">
+          <article class="guardrail-item">
+            <p class="panel-kicker">Runtime Boundary</p>
+            <h3>실제 서버와 DB 없음</h3>
+            <p>fetch, API, DB, local storage 없이 현재 페이지 메모리 상태만 사용한다.</p>
+          </article>
+          <article class="guardrail-item">
+            <p class="panel-kicker">Execution Boundary</p>
+            <h3>실행이 아닌 패턴 시뮬레이션</h3>
+            <p>payload는 정규식과 mock 시나리오 규칙으로만 판정되며 실제 SQL은 실행되지 않는다.</p>
+          </article>
+          <article class="guardrail-item">
+            <p class="panel-kicker">Input Boundary</p>
+            <h3>입력은 정규화 후 표시</h3>
+            <p>입력값은 길이 제한, 개행 제거, escape 처리 후 화면과 시뮬레이션 상태에 반영된다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section lab-section" id="lab">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Interactive Lab</p>
+            <h2>실습 콘솔</h2>
+          </div>
+          <p class="section-copy">
+            모드를 바꾸고 샘플 payload를 눌러보면 취약한 쿼리와 안전한 쿼리가 동시에 바뀐다.
+            결과는 모두 mock data를 기준으로 안전하게 시뮬레이션된다.
+          </p>
+        </div>
+
+        <div class="lab-layout">
+          <aside class="lab-sidebar reveal">
+            <div class="sidebar-block">
+              <p class="sidebar-title">Mode</p>
+              <div class="toggle-row" id="modeToggle" role="tablist" aria-label="실습 모드">
+                <button type="button" class="toggle active" data-mode="vulnerable" aria-selected="true">Vulnerable</button>
+                <button type="button" class="toggle" data-mode="safe" aria-selected="false">Safe</button>
+              </div>
+            </div>
+
+            <div class="sidebar-block">
+              <p class="sidebar-title">Scenario</p>
+              <div class="scenario-tabs" id="scenarioTabs" role="tablist" aria-label="실습 시나리오"></div>
+              <p class="sidebar-copy" id="scenarioDescription"></p>
+            </div>
+
+            <div class="sidebar-block">
+              <p class="sidebar-title">Sample Payload</p>
+              <div class="sample-list" id="sampleList"></div>
+            </div>
+
+            <p class="sidebar-note">
+              모든 결과는 브라우저 내부 mock data를 기반으로 계산된다. 실제 서버와 데이터베이스에는 연결되지 않는다.
+            </p>
+            <ul class="guardrail-note">
+              <li>입력은 최대 96자까지 반영된다.</li>
+              <li>개행과 제어문자는 제거된다.</li>
+              <li>새로고침하면 상태는 유지되지 않는다.</li>
+            </ul>
+          </aside>
+
+          <section class="console reveal" aria-labelledby="consoleTitle">
+            <div class="console-top">
+              <div>
+                <p class="eyebrow">Console</p>
+                <h3 id="consoleTitle">시뮬레이션</h3>
+              </div>
+              <span class="status-badge vulnerable" id="statusBadge">VULNERABLE MODE</span>
+            </div>
+
+            <form class="lab-form" id="labForm">
+              <div class="field-grid" id="formFields"></div>
+              <div class="form-actions">
+                <button class="button primary" type="submit">시뮬레이션 실행</button>
+                <button class="button tertiary" type="button" id="resetButton">기본값으로 되돌리기</button>
+              </div>
+            </form>
+
+            <div class="query-grid">
+              <article class="query-panel">
+                <p class="panel-kicker">Unsafe Query</p>
+                <pre id="unsafeQuery"></pre>
+              </article>
+              <article class="query-panel">
+                <p class="panel-kicker">Safe Query</p>
+                <pre id="safeQuery"></pre>
+              </article>
+            </div>
+
+            <div class="result-summary">
+              <div class="result-copy">
+                <p class="panel-kicker">Result</p>
+                <h4 id="resultTitle">결과 대기 중</h4>
+                <p id="resultSummary">샘플 payload를 선택하거나 직접 입력한 뒤 시뮬레이션을 실행해 보세요.</p>
+              </div>
+              <ul class="result-steps" id="resultSteps"></ul>
+            </div>
+
+            <div class="table-wrap">
+              <table class="result-table" aria-label="시뮬레이션 결과 테이블">
+                <thead id="resultTableHead"></thead>
+                <tbody id="resultTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="patterns">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Attack Patterns</p>
+            <h2>실습에서 확인할 SQLi 패턴</h2>
+          </div>
+          <p class="section-copy">
+            사이트는 실제 공격을 수행하지 않는다. 대신 어떤 문자열이 어떤 방식으로 쿼리 의미를 바꾸는지 안전하게 설명한다.
+          </p>
+        </div>
+
+        <div class="pattern-rail reveal">
+          <article class="pattern-row">
+            <p class="pattern-label">01</p>
+            <div>
+              <h3>Tautology</h3>
+              <p>항상 참이 되는 조건을 넣어 WHERE 절 전체를 무력화하는 패턴이다.</p>
+            </div>
+            <p class="pattern-note">예: 인증 우회, 전체 목록 노출</p>
+          </article>
+
+          <article class="pattern-row">
+            <p class="pattern-label">02</p>
+            <div>
+              <h3>Comment Termination</h3>
+              <p>뒤에 오는 조건을 주석 처리해 비밀번호 검증 같은 절을 끊어버리는 방식이다.</p>
+            </div>
+            <p class="pattern-note">예: <code>admin' --</code></p>
+          </article>
+
+          <article class="pattern-row">
+            <p class="pattern-label">03</p>
+            <div>
+              <h3>UNION SELECT</h3>
+              <p>원래 조회 결과에 다른 테이블의 데이터를 합쳐 정보 노출을 유도하는 패턴이다.</p>
+            </div>
+            <p class="pattern-note">예: 계정 목록, 이메일, 역할 정보 노출</p>
+          </article>
+
+          <article class="pattern-row">
+            <p class="pattern-label">04</p>
+            <div>
+              <h3>Stacked Query</h3>
+              <p>세미콜론 이후에 추가 명령을 이어 붙여 데이터 변경이나 삭제 위험을 만드는 패턴이다.</p>
+            </div>
+            <p class="pattern-note">실습에서는 실행하지 않고 위험성만 시뮬레이션</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section defense-section" id="defense">
+      <div class="shell defense-shell">
+        <div class="defense-copy reveal">
+          <p class="eyebrow">Defense Guide</p>
+          <h2>방어는 문자열 금지에서 시작한다</h2>
+          <p>
+            SQL injection 방어의 핵심은 입력값을 구문이 아니라 데이터로 처리하는 것이다.
+            parameterized query, 최소 권한, 오류 메시지 통제, 로깅을 함께 적용해야 실제 운영 환경에서 버틸 수 있다.
+          </p>
+          <ul class="defense-list">
+            <li>문자열 결합으로 SQL을 만들지 않는다.</li>
+            <li>Prepared statement와 ORM parameter binding을 우선 사용한다.</li>
+            <li>DB 계정 권한을 최소화해 stacked query 피해 범위를 줄인다.</li>
+            <li>DB 오류를 사용자에게 직접 노출하지 않는다.</li>
+            <li>로그인, 검색, 관리자 기능에 대한 이상 징후를 로깅하고 모니터링한다.</li>
+          </ul>
+        </div>
+
+        <div class="code-compare reveal" aria-label="취약 코드와 안전 코드 비교">
+          <div class="code-block">
+            <p class="panel-kicker">취약한 예시</p>
+            <pre><code>const sql =
+  "SELECT * FROM users WHERE username = '" +
+  username +
+  "' AND password = '" +
+  password +
+  "'";</code></pre>
+          </div>
+          <div class="code-block">
+            <p class="panel-kicker">안전한 예시</p>
+            <pre><code>const sql =
+  "SELECT * FROM users WHERE username = ? AND password = ?";
+
+db.execute(sql, [username, password]);</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section files-section" id="files">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Submission Files</p>
+            <h2>과제 제출용 파일 구성</h2>
+          </div>
+          <p class="section-copy">
+            강사가 요구한 1번 프롬프트와 2번 구현 결과물을 한 폴더 안에서 바로 확인할 수 있게 정리했다.
+            이 구현은 `HARNESS_PROMPT.md`의 강화된 제약을 기준으로 개발되었다.
+            정적 파일 구조로 유지해 GitHub Pages에 바로 배포할 수 있다.
+          </p>
+        </div>
+
+        <div class="file-manifest reveal">
+          <a class="file-row" href="HARNESS_PROMPT.md">
+            <span class="file-name">HARNESS_PROMPT.md</span>
+            <span class="file-desc">하네스 엔지니어링용 프롬프트</span>
+          </a>
+          <a class="file-row" href="index.html">
+            <span class="file-name">index.html</span>
+            <span class="file-desc">사이트 구조와 학습 콘텐츠</span>
+          </a>
+          <a class="file-row" href="styles.css">
+            <span class="file-name">styles.css</span>
+            <span class="file-desc">레이아웃, 타이포, 반응형, 모션</span>
+          </a>
+          <a class="file-row" href="script.js">
+            <span class="file-name">script.js</span>
+            <span class="file-desc">실습 시뮬레이션과 mock data 처리</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-shell">
+      <p>SQL Injection Practice Lab</p>
+      <p>Educational mock simulation only</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
