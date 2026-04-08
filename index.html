@@ -19,6 +19,7 @@
       </a>
       <nav class="site-nav" aria-label="주요 메뉴">
         <a href="#lab">실습</a>
+        <a href="#flow">흐름</a>
         <a href="#patterns">패턴</a>
         <a href="#defense">방어</a>
         <a href="#files">제출 파일</a>
@@ -34,7 +35,8 @@
           <h1>SQL Injection을 눈으로 보고 손으로 익히는 실습 사이트</h1>
           <p class="hero-summary">
             실제 데이터베이스 없이 브라우저 안에서만 동작하는 교육용 랩이다.
-            취약한 문자열 결합과 parameterized query를 비교하면서 로그인 우회, 검색 필터 우회, 정보 노출 위험을 안전하게 체험할 수 있다.
+            사용자가 입력한 문자열이 쿼리 의미를 바꾸면 왜 인증 우회와 정보 노출이 생기는지,
+            그리고 같은 입력도 parameterized query에서는 왜 무력화되는지를 한 화면에서 비교한다.
           </p>
           <div class="hero-actions">
             <a class="button primary" href="#lab">실습 시작</a>
@@ -62,6 +64,14 @@
               <dd>GitHub Pages Ready</dd>
             </div>
           </dl>
+          <p class="hero-flow">
+            학습 흐름:
+            <strong>입력</strong>이 들어오면
+            <strong>쿼리 구조</strong>가 바뀌고,
+            그 결과
+            <strong>인증 또는 조회 결과</strong>가 달라진다.
+            방어는 이 연결을 끊는 데서 시작한다.
+          </p>
         </div>
 
         <div class="hero-visual reveal" aria-hidden="true">
@@ -92,10 +102,48 @@ AND password = ?;</pre>
           <h2>실습에서 바로 보는 세 가지 핵심</h2>
         </div>
         <ul class="intro-list">
-          <li>입력값이 SQL 구문으로 섞일 때 인증과 조회가 어떻게 무너지는지 본다.</li>
-          <li>같은 입력값도 safe query에서는 단순 데이터로 처리된다는 점을 비교한다.</li>
-          <li>결과 패널에서 우회 성공, 전체 데이터 노출, stacked query 위험을 단계별로 읽는다.</li>
+          <li>입력값이 SQL 구문으로 섞이는 순간 왜 조건 검사가 무너지는지 읽기 쉽게 추적한다.</li>
+          <li>같은 문자열도 safe query에서는 단순 데이터로만 취급된다는 점을 즉시 비교한다.</li>
+          <li>결과 패널에서 원인, 쿼리 변화, 결과, 방어 포인트를 순서대로 읽는다.</li>
         </ul>
+      </div>
+    </section>
+
+    <section class="section flow-section" id="flow">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Learning Flow</p>
+            <h2>원인에서 방어까지 한 줄로 이어지는 학습 구조</h2>
+          </div>
+          <p class="section-copy">
+            SQL injection은 어려운 기술이 아니라 입력이 쿼리 구조를 바꾸는 문제다.
+            그래서 이 사이트는 개념 소개보다 먼저, 원인과 결과가 어떻게 연결되는지 논리적으로 보여준다.
+          </p>
+        </div>
+
+        <div class="flow-grid reveal">
+          <article class="flow-card">
+            <p class="panel-kicker">01 Cause</p>
+            <h3>원인</h3>
+            <p>개발자가 입력값을 문자열로 이어 붙이면 사용자는 데이터 대신 쿼리 조각을 넣을 수 있다.</p>
+          </article>
+          <article class="flow-card">
+            <p class="panel-kicker">02 Query Shift</p>
+            <h3>쿼리 변화</h3>
+            <p>따옴표, 주석, UNION, 세미콜론이 들어가면 WHERE 조건과 반환 구조가 바뀐다.</p>
+          </article>
+          <article class="flow-card">
+            <p class="panel-kicker">03 Result</p>
+            <h3>결과</h3>
+            <p>인증 우회, 전체 목록 노출, 다른 테이블 정보 노출, 데이터 손상 위험으로 이어진다.</p>
+          </article>
+          <article class="flow-card">
+            <p class="panel-kicker">04 Defense</p>
+            <h3>방어</h3>
+            <p>parameterized query를 쓰면 입력은 구문이 아니라 값으로 처리되어 인과 연결이 끊긴다.</p>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -141,7 +189,7 @@ AND password = ?;</pre>
           </div>
           <p class="section-copy">
             모드를 바꾸고 샘플 payload를 눌러보면 취약한 쿼리와 안전한 쿼리가 동시에 바뀐다.
-            결과는 모두 mock data를 기준으로 안전하게 시뮬레이션된다.
+            결과는 모두 mock data를 기준으로 안전하게 시뮬레이션되며, 설명은 원인과 결과가 바로 연결되도록 작성했다.
           </p>
         </div>
 
@@ -232,7 +280,7 @@ AND password = ?;</pre>
             <h2>실습에서 확인할 SQLi 패턴</h2>
           </div>
           <p class="section-copy">
-            사이트는 실제 공격을 수행하지 않는다. 대신 어떤 문자열이 어떤 방식으로 쿼리 의미를 바꾸는지 안전하게 설명한다.
+            사이트는 실제 공격을 수행하지 않는다. 대신 어떤 문자열이 왜 위험하고, 어떤 결과를 유발하는지 명확하게 설명한다.
           </p>
         </div>
 
@@ -280,10 +328,11 @@ AND password = ?;</pre>
       <div class="shell defense-shell">
         <div class="defense-copy reveal">
           <p class="eyebrow">Defense Guide</p>
-          <h2>방어는 문자열 금지에서 시작한다</h2>
+          <h2>방어는 "문자열을 코드로 해석하지 않게 만드는 것"에서 시작한다</h2>
           <p>
             SQL injection 방어의 핵심은 입력값을 구문이 아니라 데이터로 처리하는 것이다.
-            parameterized query, 최소 권한, 오류 메시지 통제, 로깅을 함께 적용해야 실제 운영 환경에서 버틸 수 있다.
+            parameterized query는 같은 입력이 들어와도 SQL 구조를 바꾸지 못하게 막기 때문에,
+            문자열 결합보다 훨씬 설득력 있는 1차 방어선이 된다. 여기에 최소 권한, 오류 메시지 통제, 로깅을 함께 적용해야 실제 운영 환경에서 버틸 수 있다.
           </p>
           <ul class="defense-list">
             <li>문자열 결합으로 SQL을 만들지 않는다.</li>

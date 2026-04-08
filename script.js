@@ -65,13 +65,13 @@ const scenarios = {
       const patterns = detectPatterns(`${username} ${password}`);
       const directMatch = USERS.find((user) => user.username === username && user.password === password);
       const steps = [
-        "입력값이 브라우저 내부 mock 데이터와 비교되도록 시뮬레이션한다."
+        "원인: 입력값이 로그인 쿼리의 username/password 위치에 들어간다고 가정한다."
       ];
 
       if (mode === "safe") {
-        steps.push("prepared statement에서는 입력값이 SQL 구문이 아니라 단순 파라미터로 전달된다.");
+        steps.push("방어: prepared statement에서는 입력값이 SQL 구문이 아니라 단순 파라미터로 전달된다.");
         if (patterns.any) {
-          steps.push("주입 패턴이 포함되어 있어도 쿼리 구조는 변경되지 않는다.");
+          steps.push("결과: 주입 패턴이 포함되어 있어도 쿼리 구조는 변경되지 않는다.");
         }
 
         if (directMatch) {
@@ -91,10 +91,10 @@ const scenarios = {
         };
       }
 
-      steps.push("vulnerable mode에서는 입력값이 그대로 WHERE 절에 이어 붙는다.");
+      steps.push("변화: vulnerable mode에서는 입력값이 그대로 WHERE 절에 이어 붙는다.");
 
       if (directMatch) {
-        steps.push("정상 계정과 비밀번호가 일치해 합법적으로 로그인된다.");
+        steps.push("결과: 정상 계정과 비밀번호가 일치해 합법적으로 로그인된다.");
         return {
           title: "정상 로그인 성공",
           summary: "취약한 코드라도 올바른 계정 정보에서는 일반 로그인처럼 동작한다.",
@@ -104,8 +104,8 @@ const scenarios = {
       }
 
       if (username.toLowerCase().includes("admin' --")) {
-        steps.push("주석 기호가 뒤의 비밀번호 조건을 잘라냈다.");
-        steps.push("결과적으로 username = 'admin' 조건만 남아 관리자 계정이 선택된다.");
+        steps.push("변화: 주석 기호가 뒤의 비밀번호 조건을 잘라냈다.");
+        steps.push("결과: username = 'admin' 조건만 남아 관리자 계정이 선택된다.");
         return {
           title: "관리자 계정 우회 로그인",
           summary: "comment termination으로 비밀번호 검증이 무력화되었다.",
@@ -115,8 +115,8 @@ const scenarios = {
       }
 
       if (patterns.tautology) {
-        steps.push("항상 참이 되는 조건이 들어와 WHERE 절 전체가 참으로 평가된다.");
-        steps.push("실습에서는 첫 번째 반환 행을 선택해 인증 우회를 시뮬레이션한다.");
+        steps.push("변화: 항상 참이 되는 조건이 들어와 WHERE 절 전체가 참으로 평가된다.");
+        steps.push("결과: 실습에서는 첫 번째 반환 행을 선택해 인증 우회를 시뮬레이션한다.");
         return {
           title: "조건 우회로 인증 성공",
           summary: "tautology payload 때문에 필터가 무력화되었다.",
@@ -126,8 +126,8 @@ const scenarios = {
       }
 
       if (patterns.stacked) {
-        steps.push("세미콜론 뒤에 추가 구문이 감지되어 stacked query 위험이 확인되었다.");
-        steps.push("실습 사이트에서는 실제 삭제를 수행하지 않고 위험만 경고한다.");
+        steps.push("변화: 세미콜론 뒤에 추가 구문이 감지되어 stacked query 위험이 확인되었다.");
+        steps.push("결과: 실습 사이트에서는 실제 삭제를 수행하지 않고 위험만 경고한다.");
         return {
           title: "추가 명령 실행 위험 감지",
           summary: "파괴적 명령이 이어질 수 있는 형태의 입력이 감지되었다.",
@@ -137,7 +137,8 @@ const scenarios = {
       }
 
       if (patterns.union) {
-        steps.push("UNION 기반 탐색 흔적이 있으나 로그인 쿼리에서는 주로 오류 기반 정보 노출로 이어질 수 있다.");
+        steps.push("변화: UNION 기반 탐색 흔적이 감지되었다.");
+        steps.push("결과: 로그인 쿼리에서는 주로 오류 기반 정보 노출이나 구조 탐색 단계로 이어질 수 있다.");
         return {
           title: "오류 기반 정보 노출 가능성",
           summary: "인증 우회 대신 쿼리 구조 탐색 단계로 이어질 수 있다.",
@@ -146,7 +147,7 @@ const scenarios = {
         };
       }
 
-      steps.push("일치하는 계정이 없어 인증에 실패했다.");
+      steps.push("결과: 일치하는 계정이 없어 인증에 실패했다.");
       return {
         title: "로그인 실패",
         summary: "주입 조건이 없고 자격 증명도 일치하지 않아 결과가 반환되지 않았다.",
@@ -198,13 +199,13 @@ const scenarios = {
       const patterns = detectPatterns(keyword);
       const filtered = ASSETS.filter((asset) => asset.name.includes(keyword));
       const steps = [
-        "검색 입력을 기준으로 mock asset 목록을 필터링한다."
+        "원인: 검색 입력이 LIKE 절 내부에 들어간다고 가정한다."
       ];
 
       if (mode === "safe") {
-        steps.push("safe mode에서는 LIKE 절의 와일드카드 문자열도 파라미터로 바인딩된다.");
+        steps.push("방어: safe mode에서는 LIKE 절의 와일드카드 문자열도 파라미터로 바인딩된다.");
         if (patterns.any) {
-          steps.push("특수 문자열이 있어도 검색어 자체로만 해석되므로 전체 노출이 일어나지 않는다.");
+          steps.push("결과: 특수 문자열이 있어도 검색어 자체로만 해석되므로 전체 노출이 일어나지 않는다.");
         }
 
         return {
@@ -217,11 +218,11 @@ const scenarios = {
         };
       }
 
-      steps.push("vulnerable mode에서는 검색 문자열이 LIKE 절 내부에 그대로 삽입된다.");
+      steps.push("변화: vulnerable mode에서는 검색 문자열이 LIKE 절 내부에 그대로 삽입된다.");
 
       if (patterns.union) {
-        steps.push("UNION SELECT 패턴이 감지되어 다른 테이블 데이터가 결합되는 상황을 시뮬레이션한다.");
-        steps.push("실습에서는 사용자 테이블이 노출된 것처럼 mock row를 추가한다.");
+        steps.push("변화: UNION SELECT 패턴이 감지되어 다른 테이블 데이터가 결합되는 상황을 시뮬레이션한다.");
+        steps.push("결과: 실습에서는 사용자 테이블이 노출된 것처럼 mock row를 추가한다.");
         return {
           title: "다른 테이블 정보가 함께 노출됨",
           summary: "UNION 기반 정보 노출이 발생해 원래 검색 결과 외에 계정 정보가 합쳐졌다.",
@@ -231,8 +232,8 @@ const scenarios = {
       }
 
       if (patterns.tautology) {
-        steps.push("항상 참 조건 때문에 WHERE 필터가 무력화되었다.");
-        steps.push("실습에서는 전체 asset 목록이 노출된 것으로 처리한다.");
+        steps.push("변화: 항상 참 조건 때문에 WHERE 필터가 무력화되었다.");
+        steps.push("결과: 실습에서는 전체 asset 목록이 노출된 것으로 처리한다.");
         return {
           title: "전체 데이터 노출",
           summary: "검색 필터가 우회되어 모든 mock asset이 반환되었다.",
@@ -242,8 +243,8 @@ const scenarios = {
       }
 
       if (patterns.stacked) {
-        steps.push("검색 쿼리 뒤에 추가 명령이 붙어 데이터 삭제 위험이 생길 수 있다.");
-        steps.push("실습에서는 실제 삭제를 수행하지 않고 위험도만 설명한다.");
+        steps.push("변화: 검색 쿼리 뒤에 추가 명령이 붙어 데이터 삭제 위험이 생길 수 있다.");
+        steps.push("결과: 실습에서는 실제 삭제를 수행하지 않고 위험도만 설명한다.");
         return {
           title: "추가 명령 실행 위험 감지",
           summary: "stacked query 형태의 입력이 감지되었다. 운영 환경이라면 데이터 손상으로 이어질 수 있다.",
