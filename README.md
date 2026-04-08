@@ -12,4 +12,5 @@
 ## 배포
 
 - 정적 사이트이므로 GitHub Pages에 바로 배포할 수 있다.
-- 배포 URL: 배포 후 업데이트
+- 배포 URL: https://neukho.github.io/sql-injection-practice-lab/
+- 저장소 URL: https://github.com/Neukho/sql-injection-practice-lab
