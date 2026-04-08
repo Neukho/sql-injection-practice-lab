@@ -406,6 +406,57 @@ pre {
   padding-top: 40px;
 }
 
+.ux-section {
+  padding-top: 24px;
+}
+
+.ux-grid,
+.developer-grid,
+.learner-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.ux-card,
+.developer-card,
+.learner-card,
+.insight-card {
+  padding: 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(16, 20, 18, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.66));
+  box-shadow: var(--shadow);
+}
+
+.ux-card h3,
+.developer-card h3,
+.learner-card h3,
+.insight-card h4 {
+  margin: 0 0 12px;
+  font-family: var(--display);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.ux-card h3,
+.developer-card h3,
+.learner-card h3 {
+  font-size: 1.44rem;
+}
+
+.insight-card h4 {
+  font-size: 1.26rem;
+}
+
+.ux-card p:last-child,
+.developer-card p:last-child,
+.learner-card p:last-child,
+.insight-card p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
 .flow-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -666,6 +717,13 @@ pre {
   border-top: 1px solid var(--line);
 }
 
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
 .result-copy h4 {
   margin: 0 0 10px;
   font-family: var(--display);
@@ -679,6 +737,18 @@ pre {
 }
 
 .result-steps li {
+  color: var(--muted);
+}
+
+.flat-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flat-list li {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
   color: var(--muted);
 }
 
@@ -835,9 +905,13 @@ pre {
   .hero-shell,
   .intro-shell,
   .section-head,
+  .ux-grid,
   .flow-grid,
   .guardrail-grid,
   .lab-layout,
+  .insight-grid,
+  .developer-grid,
+  .learner-grid,
   .defense-shell,
   .console-top,
   .result-summary {

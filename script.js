@@ -23,6 +23,8 @@ const scenarios = {
     label: "로그인 우회",
     short: "Authentication Bypass",
     description: "문자열 결합으로 만든 로그인 쿼리가 인증 우회에 어떻게 무너지는지 본다.",
+    developerTitle: "로그인 코드 리뷰 포인트",
+    learnerTitle: "로그인 실습 관찰 포인트",
     initial: {
       username: "student",
       password: "practice"
@@ -160,6 +162,8 @@ const scenarios = {
     label: "검색 필터 우회",
     short: "Search Filter Abuse",
     description: "검색창 하나만 있어도 SQL 구문이 섞이면 전체 데이터 노출과 UNION 기반 정보 노출이 생길 수 있다.",
+    developerTitle: "검색 기능 코드 리뷰 포인트",
+    learnerTitle: "검색 실습 관찰 포인트",
     initial: {
       keyword: "guide"
     },
@@ -287,6 +291,10 @@ const safeQuery = document.getElementById("safeQuery");
 const resultTitle = document.getElementById("resultTitle");
 const resultSummary = document.getElementById("resultSummary");
 const resultSteps = document.getElementById("resultSteps");
+const developerInsightTitle = document.getElementById("developerInsightTitle");
+const developerInsightBody = document.getElementById("developerInsightBody");
+const learnerInsightTitle = document.getElementById("learnerInsightTitle");
+const learnerInsightBody = document.getElementById("learnerInsightBody");
 const resultTableHead = document.getElementById("resultTableHead");
 const resultTableBody = document.getElementById("resultTableBody");
 
@@ -428,6 +436,7 @@ function runSimulation() {
   resultTitle.textContent = result.title;
   resultSummary.textContent = result.summary;
   resultSteps.innerHTML = result.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join("");
+  renderInsights(state.scenario, state.mode);
   renderTable(result.rows);
 }
 
@@ -443,6 +452,44 @@ function renderTable(rows) {
   resultTableBody.innerHTML = rows
     .map((row) => `<tr>${columns.map((column) => `<td>${escapeHtml(String(row[column]))}</td>`).join("")}</tr>`)
     .join("");
+}
+
+function renderInsights(scenarioKey, mode) {
+  const insights = getScenarioInsights(scenarioKey, mode);
+  developerInsightTitle.textContent = insights.developerTitle;
+  developerInsightBody.textContent = insights.developerBody;
+  learnerInsightTitle.textContent = insights.learnerTitle;
+  learnerInsightBody.textContent = insights.learnerBody;
+}
+
+function getScenarioInsights(scenarioKey, mode) {
+  if (scenarioKey === "login") {
+    return {
+      developerTitle: scenarios.login.developerTitle,
+      developerBody:
+        mode === "safe"
+          ? "로그인 입력이 파라미터로만 전달되면 비밀번호 조건이 잘리지 않는다. 개발자는 인증 쿼리 전체를 prepared statement로 바꿨는지부터 확인해야 한다."
+          : "로그인 로직에서 username과 password가 문자열로 이어 붙는 순간 인증 절 자체가 깨질 수 있다. 코드 리뷰에서는 문자열 결합과 주석 우회 가능성을 먼저 찾는다.",
+      learnerTitle: scenarios.login.learnerTitle,
+      learnerBody:
+        mode === "safe"
+          ? "같은 문자열이 들어가도 safe mode에서는 구조가 바뀌지 않는다. 왜 'admin' -- 가 관리자 로그인을 만들지 못하는지 safe query를 먼저 읽어 보라."
+          : "로그인 우회는 비밀번호를 맞힌 것이 아니라 비밀번호 검사 자체를 끊어낸 결과다. 결과보다 먼저 WHERE 절에서 무엇이 사라졌는지 보라."
+    };
+  }
+
+  return {
+    developerTitle: scenarios.search.developerTitle,
+    developerBody:
+      mode === "safe"
+        ? "검색어가 LIKE 파라미터로만 들어가면 UNION과 OR 1=1도 단순 텍스트가 된다. 검색 기능은 '읽기 전용'처럼 보여도 반드시 파라미터 바인딩이 필요하다."
+        : "검색 기능은 입력 필드가 하나뿐이어도 대량 노출 지점이 될 수 있다. 개발자는 검색 API, 목록 조회, 관리자 필터를 같은 위험도로 봐야 한다.",
+    learnerTitle: scenarios.search.learnerTitle,
+    learnerBody:
+      mode === "safe"
+        ? "safe mode에서는 검색 결과가 늘어나지 않는다. 즉, 공격 문자열의 핵심은 텍스트 자체가 아니라 쿼리 구조를 바꾸는 능력이라는 점을 기억하라."
+        : "검색 실습에서는 '조건이 넓어졌는지', '다른 테이블이 붙었는지', '추가 명령 위험이 생겼는지'를 순서대로 보면 이해가 빠르다."
+  };
 }
 
 function formatLoginRow(user, reason) {
